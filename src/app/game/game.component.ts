@@ -4,10 +4,7 @@ import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
 import { Firestore, collectionData, collection, setDoc, doc, addDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-
-
-
-
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -23,22 +20,7 @@ export class GameComponent implements OnInit {
   coll: any;
 
   // private firestore: getFirestore,
-  constructor(private firestore: Firestore, public dialog: MatDialog) {
-    
-    // this.games = firestore.collection('games').valueChanges();
-
-
-
-    // _______________________________________
-    // const coll2 = collection(firestore, 'games');
-    // this.todos$ = collectionData(coll);
-
-    // this.todos$.subscribe( newTodos => {
-    //   console.log('neue Todos sind:', newTodos);
-    //   this.todos = newTodos;
-    //   alert('New Todo UPDATE');
-    // });   
-   }
+  constructor(private firestore: Firestore, public dialog: MatDialog, private route: ActivatedRoute) {}
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogAddPlayerComponent); 
@@ -50,40 +32,27 @@ export class GameComponent implements OnInit {
     });
   }
 
-  // openDialog(): void {
-  //   const dialogRef = this.dialog.open(DialogAddPlayerComponent);
-   
-  //    dialogRef.afterClosed().subscribe((name: string => {
-  //     if(name && name.length > 0) {
-  //        this.game.players.push(name);
-  //      }
-  //    });
-  //  }
+  async ngOnInit(): Promise<void> {
+    // this.newGame()
+    this.route.params.subscribe(async (params) => {
+      console.log(params['id']);
 
-  ngOnInit(): void {
-    this.newGame()
+      const coll = collection(this.firestore, 'games');
+      let gameInformation = await addDoc(coll, { game: this.game.toJSON() });
+      console.log(gameInformation);
+    });
 
-    const coll = collection(this.firestore, 'games');
-    this.games$ = collectionData(coll);
-    this.games$.subscribe( newGameInfos => {
-      console.log('Game update', newGameInfos);
-    })
+    
 
-    // this
-      // .firestore.collection('games')
-      // .valueChanges()
-      // .subscribe((game: any) => {
-      //   console.log('Game update', game);
-      // })
   }
 
   async newGame() {
     this.game = new Game();
     console.log(this.game)
     
-    const coll = collection(this.firestore, 'games');
-    let gameInformation = await addDoc(coll, {game: this.game.toJSON()} );
-    console.log(gameInformation);
+    // const coll = collection(this.firestore, 'games');
+    // let gameInformation = await addDoc(coll, { game: this.game.toJSON() });
+    // console.log(gameInformation);
     
   }
 

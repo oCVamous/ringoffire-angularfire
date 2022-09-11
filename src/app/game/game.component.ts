@@ -23,6 +23,7 @@ export class GameComponent implements OnInit {
   games$: Observable<any[]> | undefined;
   games : Array<any> | undefined;
   coll: any;
+  gameId: string = '';
 
   // private firestore: getFirestore,
   constructor(private firestore: Firestore, public dialog: MatDialog, private route: ActivatedRoute) {
@@ -39,20 +40,25 @@ export class GameComponent implements OnInit {
     });
   }
 
-  async ngOnInit(): Promise<void> {
-    // this.newGame()
+  ngOnInit(): void {
+    // this.newGame();
+
     this.route.params.subscribe(async (params) => {
-      console.log(params['id']);
+      this.gameId = params['gameId'];
+      onSnapshot(doc(this.firestore, "games", params['gameId']), (doc) => {
+        const loadGame:any =doc.data();     
+        this.updateGameData(loadGame);
+      });
+    })
+  }
 
-      const coll = doc(params['id']);
-      let gameInformation = await addDoc(this.coll, { game: this.game.toJSON() });
-      console.log(gameInformation);
-
-      this.game.currentPlayer = this.game.currentPlayer;
-      this.game.playedCards = this.game.playedCards;
-      this.game.players = this.game.players;
-      this.game.stack = this.game.stack;
-    });
+    updateGameData(loadGame: any) {
+      
+      this.game.currentPlayer =  loadGame.currentPlayer;
+      this.game.playedCards = loadGame.playedCards;
+      this.game.players = loadGame.players;
+      this.game.stack = loadGame.stack;
+    }
 
 
     
@@ -65,7 +71,7 @@ export class GameComponent implements OnInit {
     //   });
 
     
-  }
+  
 
   // ngOnInit(): void {
   //   this.newGame();
@@ -129,3 +135,4 @@ export class GameComponent implements OnInit {
 
 
 }
+

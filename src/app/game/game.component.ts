@@ -2,9 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { Game } from '../models/game';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { Firestore, collectionData, collection, setDoc, doc, addDoc } from '@angular/fire/firestore';
+import { Firestore, collectionData, collection, setDoc, addDoc, docData  } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
+import { doc, onSnapshot } from "firebase/firestore";
+
+
+
+
 
 @Component({
   selector: 'app-game',
@@ -20,7 +25,9 @@ export class GameComponent implements OnInit {
   coll: any;
 
   // private firestore: getFirestore,
-  constructor(private firestore: Firestore, public dialog: MatDialog, private route: ActivatedRoute) {}
+  constructor(private firestore: Firestore, public dialog: MatDialog, private route: ActivatedRoute) {
+    const db = collection(this.firestore, 'games')
+  }
 
   openDialog(): void {
     const dialogRef = this.dialog.open(DialogAddPlayerComponent); 
@@ -37,14 +44,51 @@ export class GameComponent implements OnInit {
     this.route.params.subscribe(async (params) => {
       console.log(params['id']);
 
-      const coll = collection(this.firestore, 'games');
-      let gameInformation = await addDoc(coll, { game: this.game.toJSON() });
+      const coll = doc(params['id']);
+      let gameInformation = await addDoc(this.coll, { game: this.game.toJSON() });
       console.log(gameInformation);
+
+      this.game.currentPlayer = this.game.currentPlayer;
+      this.game.playedCards = this.game.playedCards;
+      this.game.players = this.game.players;
+      this.game.stack = this.game.stack;
     });
+
 
     
 
+    // const unsub = onSnapshot(
+    //   doc(this.coll), 
+    //   { includeMetadataChanges: true }, 
+    //   (doc) => {
+    //     // ...
+    //   });
+
+    
   }
+
+  // ngOnInit(): void {
+  //   this.newGame();
+  //   this.route.params.subscribe((params) => {
+  //     console.log(params.id);
+
+  //     this
+  //       .firestore
+  //       .collection('games')
+  //       .doc(params.id)
+  //       .valueChanges()
+  //       .subscribe((game: any) => {
+  //         console.log('Game update', game);
+  //         this.game.currentPlayer = game.currentPlayer;
+  //         this.game.playedCards = game.playedCards;
+  //         this.game.players = game.players;
+  //         this.game.stack = game.stack;
+
+  //       });
+
+  //   });
+
+  // }
 
   async newGame() {
     this.game = new Game();

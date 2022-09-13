@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { Game } from '../models/game';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { MatDialog, MatDialogRef} from '@angular/material/dialog';
-import { Firestore, collectionData, collection, setDoc, addDoc, docData  } from '@angular/fire/firestore';
+import { AngularFirestore  } from '@angular/fire/compat/firestore';
+import {  collection  } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { doc, onSnapshot } from "firebase/firestore";
-
-
 
 
 
@@ -23,11 +22,10 @@ export class GameComponent implements OnInit {
   games$: Observable<any[]> | undefined;
   games : Array<any> | undefined;
   coll: any;
-  gameId: string = '';
 
   // private firestore: getFirestore,
-  constructor(private firestore: Firestore, public dialog: MatDialog, private route: ActivatedRoute) {
-    const db = collection(this.firestore, 'games')
+  constructor(private firestore: AngularFirestore, public dialog: MatDialog, private route: ActivatedRoute) {
+    // const db = collection(this.firestore, 'games')
   }
 
   openDialog(): void {
@@ -40,61 +38,56 @@ export class GameComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    // this.newGame();
+  // async ngOnInit(): Promise<void> {
+  //   // this.newGame()
+  //   this.route.params.subscribe(async (params) => {
+  //     console.log(params['id']);
 
-    this.route.params.subscribe(async (params) => {
-      this.gameId = params['gameId'];
-      onSnapshot(doc(this.firestore, "games", params['gameId']), (doc) => {
-        const loadGame:any =doc.data();     
-        this.updateGameData(loadGame);
-      });
-    })
-  }
+  //     const coll = doc(params['id']);
+  //     let gameInformation = await addDoc(this.coll, { game: this.game.toJSON() });
+  //     console.log(gameInformation);
 
-    updateGameData(loadGame: any) {
-      
-      this.game.currentPlayer =  loadGame.currentPlayer;
-      this.game.playedCards = loadGame.playedCards;
-      this.game.players = loadGame.players;
-      this.game.stack = loadGame.stack;
-    }
-
-
-    
-
-    // const unsub = onSnapshot(
-    //   doc(this.coll), 
-    //   { includeMetadataChanges: true }, 
-    //   (doc) => {
-    //     // ...
-    //   });
-
-    
-  
-
-  // ngOnInit(): void {
-  //   this.newGame();
-  //   this.route.params.subscribe((params) => {
-  //     console.log(params.id);
-
-  //     this
-  //       .firestore
-  //       .collection('games')
-  //       .doc(params.id)
-  //       .valueChanges()
-  //       .subscribe((game: any) => {
-  //         console.log('Game update', game);
-  //         this.game.currentPlayer = game.currentPlayer;
-  //         this.game.playedCards = game.playedCards;
-  //         this.game.players = game.players;
-  //         this.game.stack = game.stack;
-
-  //       });
-
+  //     this.game.currentPlayer = this.game.currentPlayer;
+  //     this.game.playedCards = this.game.playedCards;
+  //     this.game.players = this.game.players;
+  //     this.game.stack = this.game.stack;
   //   });
 
+
+    
+
+  //   // const unsub = onSnapshot(
+  //   //   doc(this.coll), 
+  //   //   { includeMetadataChanges: true }, 
+  //   //   (doc) => {
+  //   //     // ...
+  //   //   });
+
+    
   // }
+
+  ngOnInit(): void {
+    this.newGame();
+    this.route.params.subscribe((params) => {
+      console.log(params['id']);
+
+      this
+        .firestore
+        .collection('games')
+        .doc(params['id'])
+        .valueChanges()
+        .subscribe((game: any) => {
+          console.log('Game update', game);
+          this.game.currentPlayer = game.currentPlayer;
+          this.game.playedCards = game.playedCards;
+          this.game.players = game.players;
+          this.game.stack = game.stack;
+
+        });
+
+    });
+
+  }
 
   async newGame() {
     this.game = new Game();
@@ -108,7 +101,7 @@ export class GameComponent implements OnInit {
 
   takeCard() {
     if(!this.pickCardAnimation) {
-      this.currentCard = this.game.stack.pop();
+      this.currentCard = this.game?.stack.pop();
       console.log(this.currentCard)
       this.pickCardAnimation = true;
       
@@ -135,4 +128,3 @@ export class GameComponent implements OnInit {
 
 
 }
-
